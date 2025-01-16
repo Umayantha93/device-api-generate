@@ -40,7 +40,6 @@ class DeviceController extends Controller
             $device->update([
                 'device_type' => 'free',
                 'device_api_key' => Str::random(32),
-                'registered_at' => now(),
             ]);
         }
     
