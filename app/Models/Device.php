@@ -17,4 +17,9 @@ class Device extends Model
     {
         return $this->hasMany(LeasingPeriod::class);
     }
+
+    public function deviceOwner()
+    {
+        return $this->belongsTo(DeviceOwner::class);
+    }
 }

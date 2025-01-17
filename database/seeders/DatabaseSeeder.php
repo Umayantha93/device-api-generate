@@ -19,6 +19,6 @@ class DatabaseSeeder extends Seeder
         //     'name' => 'Test User',
         //     'email' => 'test@example.com',
         // ]);
-        $this->call([DeviceSeeder::class, ActivationCodeSeeder::class]);
+        $this->call([DeviceSeeder::class, ActivationCodeSeeder::class, DeviceOwnersTableSeeder::class]);
     }
 }

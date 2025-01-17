@@ -11,31 +11,31 @@ class DeviceController extends Controller
 {
     public function register(Request $request)
     {
+        // dd($request);
         $validated = $request->validate([
             'deviceId' => 'required|exists:devices,device_id',
             'activationCode' => 'nullable|exists:activation_codes,code',
         ]);
-    
-        $device = Device::where('device_id', $validated['deviceId'])->first();
-    
-        if (!$device || $device->device_type == 'restricted') {
-            return response()->json(['error' => 'Registration failed'], 400);
+        
+        $device = Device::where('device_id', $validated['deviceId'])->first();  
+        
+        if ($device->device_type == 'restricted') {
+            return response()->json(['error' => 'The device has been suspended'], 400);
         }
     
         if ($validated['activationCode']) {
             $activationCode = ActivationCode::where('code', $validated['activationCode'])->first();
-    
-            if (!$activationCode->leasingPlan) {
+
+            if (!$activationCode) {
                 return response()->json(['error' => 'Invalid activation code'], 400);
             }
-    
+
             $device->update([
                 'device_type' => 'leasing',
                 'activation_code_id' => $activationCode->id,
                 'device_api_key' => Str::random(32),
             ]);
-    
-            $activationCode->update(['assigned_to' => $device->id]);
+
         } else {
             $device->update([
                 'device_type' => 'free',
@@ -45,9 +45,9 @@ class DeviceController extends Controller
     
         return response()->json([
             'deviceId' => $device->device_id,
-            'deviceAPIKey' => $device->device_api_key,
             'deviceType' => $device->device_type,
-            'timestamp' => now(),
+            'deviceAPIKey' => $device->device_api_key,
+            'timestamp' => $device->created_at,
         ]);
     }
     
