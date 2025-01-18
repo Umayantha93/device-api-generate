@@ -11,23 +11,27 @@ class DeviceController extends Controller
 {
     public function register(Request $request)
     {
-        // dd($request);
         $validated = $request->validate([
             'deviceId' => 'required|exists:devices,device_id',
             'activationCode' => 'nullable|exists:activation_codes,code',
         ]);
         
-        $device = Device::where('device_id', $validated['deviceId'])->first();  
+        $device = Device::with('activationCode')->where('device_id', $validated['deviceId'])->first();
         
         if ($device->device_type == 'restricted') {
             return response()->json(['error' => 'The device has been suspended'], 400);
         }
     
         if ($validated['activationCode']) {
+
             $activationCode = ActivationCode::where('code', $validated['activationCode'])->first();
 
-            if (!$activationCode) {
-                return response()->json(['error' => 'Invalid activation code'], 400);
+            if ($activationCode->code === $device->activationCode->code) {
+                return response()->json(['error' => 'Activation code is being used'], 400);
+            }
+
+            if ($device->device_type === 'leasing') {
+                return response()->json(['error' => 'This device already have a leasing plan'], 400);
             }
 
             $device->update([

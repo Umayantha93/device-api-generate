@@ -16,7 +16,7 @@ class DeviceSeeder extends Seeder
         $devices = [];
         for ($i = 1; $i <= 10; $i++) {
             $devices[] = [
-                'device_id' => sprintf('NW-H-20-%04d', $i + 16), // NW-H-20-0017 to NW-H-20-0026
+                'device_id' => sprintf('NW-H-20-%04d', $i + 16),
                 'device_type' => 'unset',
                 'created_at' => now(),
                 'updated_at' => now(),
