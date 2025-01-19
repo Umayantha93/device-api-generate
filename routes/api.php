@@ -14,4 +14,4 @@ Route::get('/user', function (Request $request) {
 Route::post('/register', [DeviceController::class, 'register']);
 
 Route::get('/device/info/{id}', [LeasingController::class, 'getInfo'])->middleware(Authenticate::class);
-Route::put('/device/update/{id}', [LeasingController::class, 'updateLeasing']);
+Route::put('/device/update/{id}', [LeasingController::class, 'updateLeasing'])->middleware(Authenticate::class);
