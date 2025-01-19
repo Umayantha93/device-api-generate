@@ -21,13 +21,17 @@ class DeviceController extends Controller
         if ($device->device_type == 'restricted') {
             return response()->json(['error' => 'The device has been suspended'], 400);
         }
+
+        if ($device->device_type == 'leasing' && $validated['activationCode'] == null) {
+            return response()->json(['error' => 'The device has been registered with leasing plan cannot set it into free account'], 400);
+        }
     
         if ($validated['activationCode']) {
 
             $activationCode = ActivationCode::where('code', $validated['activationCode'])->first();
-
-            if ($activationCode->code === $device->activationCode->code) {
-                return response()->json(['error' => 'Activation code is being used'], 400);
+            
+            if ($device->activation_code_id === $activationCode->id) {
+                return response()->json(['error' => 'The activation code is already linked to this device'], 400);
             }
 
             if ($device->device_type === 'leasing') {

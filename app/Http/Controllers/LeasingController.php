@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\LeasingResource;
 use App\Models\Device;
 use App\Models\LeasingPeriod;
 use Illuminate\Http\Request;
@@ -10,18 +11,23 @@ class LeasingController extends Controller
 {
     public function getInfo($id)
     {
-        $device = Device::with(['activationCode.leasingPlan', 'leasingPeriods'])->where('device_id', $id)->first();
-    
+        $device = Device::with(['deviceOwner', 'leasingPeriods'])->find($id);
+
         if (!$device) {
             return response()->json(['error' => 'Device not found'], 404);
         }
-    
-        return response()->json([
-            'deviceId' => $device->device_id,
-            'deviceType' => $device->device_type,
-            'leasingPeriods' => $device->leasingPeriods,
-            'timestamp' => now(),
-        ]);
+
+        $currentLeasingPeriod = $device->leasingPeriods()->latest('start_date')->first();
+
+        $leasingPeriodsComputed = $currentLeasingPeriod ? [
+            'leasingConstructionId' => $currentLeasingPeriod->id,
+            'leasingConstructionMaximumTraining' => $currentLeasingPeriod->leasing_construction_maximum_training,
+            'leasingConstructionMaximumDate' => $currentLeasingPeriod->leasing_construction_maximum_date,
+            'leasingActualPeriodStartDate' => $currentLeasingPeriod->start_date,
+            'leasingNextCheck' => $currentLeasingPeriod->next_check,
+        ] : null;
+
+        return new LeasingResource($device, $leasingPeriodsComputed);
     }
 
     public function updateLeasing(Request $request, $id)
@@ -37,8 +43,10 @@ class LeasingController extends Controller
             return response()->json(['error' => 'Leasing period not found'], 404);
         }
 
-        $leasingPeriod->update(['trainings_completed' => $validated['deviceTrainings']]);
-
+        $leasingPeriod->update([
+            'trainings_completed' => $validated['deviceTrainings'] + $leasingPeriod->maximum_training,
+        ]);
+        
         return response()->json(['success' => true, 'message' => 'Leasing period updated']);
     }
 

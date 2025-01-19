@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('device_id')->constrained('devices')->cascadeOnDelete();
             $table->foreignId('leasing_plan_id')->constrained('leasing_plans')->cascadeOnDelete();
-            $table->integer('trainings_completed')->default(0);
-            $table->date('start_date');
-            $table->timestamp('next_check');
+            $table->integer('leasing_construction_id')->nullable();
+            $table->integer('leasing_construction_maximum_training')->nullable();
+            $table->date('leasing_construction_maximum_date')->nullable();
+            $table->date('start_date')->nullable();
+            $table->timestamp('next_check')->nullable();
             $table->timestamps();
         });
     }

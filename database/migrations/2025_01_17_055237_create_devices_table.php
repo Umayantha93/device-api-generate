@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('device_id')->unique();
             $table->enum('device_type', ['unset', 'free', 'leasing', 'restricted'])->default('unset');
             $table->foreignId('activation_code_id')->nullable()->constrained('activation_codes')->cascadeOnDelete();
-            $table->foreignId('owner_id')->nullable()->constrained('device_owners')->cascadeOnDelete();
+            $table->foreignId('device_owner_id')->nullable()->constrained('device_owners')->cascadeOnDelete();
             $table->string('device_api_key')->nullable()->unique();
             $table->timestamps();
         });
